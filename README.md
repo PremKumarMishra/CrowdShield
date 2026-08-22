@@ -8,7 +8,7 @@
 
 The following diagram illustrates the complete end-to-end telemetry, computer vision processing pipeline, predictive physics calculations, and citizen mobile interactivity powering **CrowdShield**.
 
-![CrowdShield System Architecture Flowchart](flowchart/flowchart.png)
+![CrowdShield System Architecture Flowchart](flowchart/Flowchart.png)
 
 ---
 
