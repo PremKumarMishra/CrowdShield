@@ -8,7 +8,7 @@
 
 The following diagram illustrates the complete end-to-end telemetry, computer vision processing pipeline, predictive physics calculations, and citizen mobile interactivity powering **CrowdShield**.
 
-![CrowdShield System Architecture Flowchart](flowchart.svg)
+![CrowdShield System Architecture Flowchart](flowchart/flowchart.svg)
 
 ---
 
@@ -17,7 +17,7 @@ The following diagram illustrates the complete end-to-end telemetry, computer vi
 Conventional crowd management and event monitoring tools rely on basic headcounts or static security cameras. **CrowdShield** introduces a multi-disciplinary approach blending computer vision, theoretical physics, dynamic sensor fusion, and natural audio intelligence:
 
 * **Custom Head-Only YOLO Model:** Standard object detection models (like stock YOLOv8) look for entire human bodies. In dense, shoulder-to-shoulder crowds, body occlusion causes severe detection failure. We trained a customized YOLO model fine-tuned specifically on human heads. By restricting the Region of Interest (ROI) exclusively to head contours, we eliminate body-occlusion false negatives and achieve unmatched counting precision in overcrowded spaces.
-* **Homography Spatial Mapping:** Camera pixels alone cannot convey physical distance or crowd density. Using Homography, we map 2D camera perspectives onto physical 2D venue grids ($2.0	ext{m} 	imes 2.0	ext{m}$ cells). This mathematical transformation converts pixel coordinates into true spatial ground locations, providing an accurate, meter-by-meter density heatmap.
+* **Homography Spatial Mapping:** Camera pixels alone cannot convey physical distance or crowd density. Using Homography, we map 2D camera perspectives onto physical 2D venue grids ($2.0\text{m} \times 2.0\text{m}$ cells). This mathematical transformation converts pixel coordinates into true spatial ground locations, providing an accurate, meter-by-meter density heatmap.
 * **Helbing Crowd Turbulence Physics Model:** Rather than treating crowds as static headcounts, CrowdShield applies **Dirk Helbing's Crowd Turbulence Model**. We treat individuals as interactive particles within a dynamic fluid. The model calculates how localized disturbances propagate as crushing forces and panic shockwaves, warning security operators before physical crowd crushes occur.
 * **Advanced Indoor Positioning System (IPS):** GPS signals degrade or fail completely inside stadiums, underground arenas, and massive halls. Our mobile platform employs **Sensor Fusion (Accelerometer + Magnetometer + GPS)** paired with **Pedestrian Dead Reckoning (PDR)** to track indoor movement trajectories offline with pinpoint accuracy.
 * **Sarvam AI Voice Incident Reporting & Multilingual Announcements:**
@@ -65,11 +65,11 @@ By focusing solely on head detections, inference speeds remain high even on edge
 
 ## 4. Homography & Top-Down Projection
 
-To translate pixel space into real-world venue space, a $3 	imes 3$ Homography matrix $H$ is computed between annotated camera reference points and physical floorplan points.
+To translate pixel space into real-world venue space, a $3 \times 3$ Homography matrix $H$ is computed between annotated camera reference points and physical floorplan points.
 
 Given a camera frame coordinate $P_c = (x_c, y_c, 1)$, the corresponding venue floor coordinate $P_v = (x_v, y_v, 1)$ is derived via matrix multiplication:
 
-$$ P_v = H 	imes P_c $$
+$$ P_v = H \times P_c $$
 
 ```python
 # Perspective Transformation (vision/projection.py)
@@ -78,7 +78,7 @@ import cv2
 self.h_matrix, _ = cv2.findHomography(camera_points, venue_points)
 ```
 
-Bounding box centers are mapped onto a calibrated $2.0	ext{m} 	imes 2.0	ext{m}$ grid, incrementally building a density heatmap (assuming $+0.25$ density increment per detected person per cell).
+Bounding box centers are mapped onto a calibrated $2.0\text{m} \times 2.0\text{m}$ grid, incrementally building a density heatmap (assuming $+0.25$ density increment per detected person per cell).
 
 ---
 
@@ -86,11 +86,11 @@ Bounding box centers are mapped onto a calibrated $2.0	ext{m} 	imes 2.0	ext{m}$ 
 
 Crowd motion vectors are extracted using OpenCV's Dense Optical Flow (`cv2.calcOpticalFlowFarneback`).
 
-* **Mean Speed ($V$):** $V = rac{1}{N} \sum (	ext{magnitude})$
-* **Velocity Variance ($\sigma^2$):** $\sigma^2 = rac{1}{N} \sum (	ext{magnitude} - V)^2$
-* **Net Flow Direction Angle ($	heta$):**
+* **Mean Speed ($V$):** $V = \frac{1}{N} \sum (\text{magnitude})$
+* **Velocity Variance ($\sigma^2$):** $\sigma^2 = \frac{1}{N} \sum (\text{magnitude} - V)^2$
+* **Net Flow Direction Angle ($\theta$):**
 
-$$	heta = \operatorname{atan2}(ar{d_y}, ar{d_x}) 	imes rac{180}{\pi}$$
+$$ \theta = \text{atan2}(\bar{d}_y, \bar{d}_x) \times \frac{180}{\pi} $$
 
 ```python
 angle = np.degrees(np.arctan2(mean_dy, mean_dx))
@@ -104,10 +104,10 @@ This analytics engine detects sudden flow reversals (*Reverse Flow*) when crowd 
 
 When crowd density crosses critical thresholds, microscopic motion gives way to macroscopic fluid dynamics. **Helbing's Crowd Turbulence Model** defines crowd pressure $P$ as:
 
-$$ P = ho 	imes (1 + V \cdot \sigma^2) $$
+$$ P = \rho \times (1 + V \cdot \sigma^2) $$
 
 Where:
-* $ho$ represents local spatial crowd density.
+* $\rho$ represents local spatial crowd density.
 * $V$ represents normalized mean velocity.
 * $\sigma^2$ represents velocity variance (turbulence/chaos).
 
@@ -133,9 +133,9 @@ The system continually monitors video telemetry for critical behavioral anomalie
 1. **Sudden Surge:** Triggered when `surge_ratio > 1.3` and `net_flow_rate > 2.0`.
 2. **Panic Onset:** Triggered when `variance_spike > 2.5` and `speed_spike > 1.6`.
 3. **Panic Propagation:** Sustained high turbulence accompanied by sudden velocity spikes across consecutive frames.
-4. **Time to Crush Estimate ($T_{	ext{crush}}$):**
+4. **Time to Crush Estimate ($T_{\text{crush}}$):**
 
-$$ T_{	ext{crush}} = rac{N_{	ext{max}} - N_{	ext{current}}}{	ext{Net Flow Rate}} $$
+$$ T_{\text{crush}} = \frac{N_{\text{max}} - N_{\text{current}}}{\text{Net Flow Rate}} $$
 
 ---
 
@@ -157,11 +157,11 @@ For GPS-denied environments, the mobile app leverages **Pedestrian Dead Reckonin
 
 1. **Initial Anchor:** GPS coordinate $(X_0, Y_0)$ captured upon venue entrance.
 2. **Step Detection:** Accelerometer peaks measure step strides $L$.
-3. **Heading Calculation:** Magnetometer provides continuous yaw angle $	heta_t$ relative to Magnetic North.
+3. **Heading Calculation:** Magnetometer provides continuous yaw angle $\theta_t$ relative to Magnetic North.
 4. **Position Update Equations:**
 
-$$ X_t = X_{t-1} + (L \cdot \cos(	heta_t)) $$
-$$ Y_t = Y_{t-1} + (L \cdot \sin(	heta_t)) $$
+$$ X_t = X_{t-1} + (L \cdot \cos(\theta_t)) $$
+$$ Y_t = Y_{t-1} + (L \cdot \sin(\theta_t)) $$
 
 This guarantees uninterrupted user tracking when an SOS signal is raised indoors.
 
@@ -170,29 +170,6 @@ This guarantees uninterrupted user tracking when an SOS signal is raised indoors
 ## 10. Sarvam AI Voice Reporting & Multilingual Engine
 
 Emergency response requires effortless communication without language barriers.
-
-```
-+-------------------------------------------------------------------+
-|                     Sarvam AI Integration Engine                  |
-+-------------------------------------------------------------------+
-|                                                                   |
-| [ Citizen Mobile App ]                                            |
-|   ├── Hold Mic Button -> Voice Audio Stream                       |
-|   └── Preferred Language Setting (e.g., Hindi / Tamil / English)  |
-|                                                                   |
-|                             ↓ (Audio Payload)                     |
-|                                                                   |
-| [ Sarvam AI Speech & NLU Pipeline ]                               |
-|   ├── 1. Speech-to-Text & Language Translation                    |
-|   ├── 2. NLU Categorization (Medical / Fire / Stampede / Hazard)   |
-|   └── 3. Text-to-Speech Generation in User's Local Language       |
-|                                                                   |
-|                             ↓ (Categorized Alert)                 |
-|                                                                   |
-| [ Command Center & Rapid GPS Dispatch ]                           |
-|   └── Instant Incident Ticket + Sector Coordinates + Steward Push |
-+-------------------------------------------------------------------+
-```
 
 ### Key Capabilities:
 * **Voice Incident Reporting:** Users hold the mic button, speak naturally about any ongoing hazard, and Sarvam AI parses the audio, categorizes the incident type, assigns severity, and attaches the exact GPS/IPS location for instant responder deployment.
