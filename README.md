@@ -217,13 +217,141 @@ When the Risk Engine detects a **RED** anomaly:
 
 ---
 
-## 13. Project Repository
+## 13. Tech Stack & Dependencies
+
+### Backend (`backend/`)
+
+* **Python Version:** Python 3.12.10 (64-bit)
+* **Framework & Web Server:** FastAPI, Uvicorn
+* **Computer Vision & ML:** Ultralytics YOLO (custom-trained YOLOv8 head-detection model), OpenCV (`opencv-python`), NumPy
+  * **Custom YOLO Dataset:** Trained using the [Crowd Counting dataset by YOLO Analysis on Roboflow](https://universe.roboflow.com/yolo-analysis/crowd-counting-umiax/dataset/1)
+  * **Dataset:** 2,200 annotated images with a 70% training, 20% validation, and 10% test split. The dataset was resized to 640×640 during preprocessing.
+  * **Model:** Custom YOLOv8 model trained specifically for crowd/head detection and integrated into the CrowdShield backend.
+* **Voice AI & NLP:** Sarvam AI
+* **Communication:** WebSockets, REST APIs
+
+### Command Center Dashboard (`Command-Center-Dashboard/`)
+
+* **Framework & Build Tools:** React (v19.2.7), Vite (v8.1.0)
+* **Styling:** Tailwind CSS (v4.3.3), `@tailwindcss/vite`
+* **Maps & Data Visualization:** Leaflet (v1.9.4), `leaflet.heat` (v0.2.0), Chart.js (v4.5.1)
+* **Networking:** Axios (v1.19.0), WebSockets
+
+### Mobile App (`CrowdShieldApp/`)
+
+* **Framework:** React Native (v0.86.2), React (v19.2.3)
+* **Platform:** Expo (~57.0.13)
+* **Hardware & Sensors:**
+
+  * `expo-sensors` (Accelerometer & Magnetometer for IPS tracking)
+  * `expo-location` (GPS positioning)
+  * `expo-haptics` (Vibration alerts)
+  * `expo-audio` (SOS voice recording)
+* **Expo System Utilities:** `expo-file-system`, `expo-network`, `expo-constants`, `expo-status-bar`
+* **UI & Data:** `react-native-maps`, `react-native-svg`, `@expo/vector-icons`, `@react-native-async-storage/async-storage`
+
+---
+
+## 14. Setup & Run Instructions
+
+### 1. Backend Server (`backend/`)
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the backend server:
+
+```bash
+python server.py
+```
+
+The server starts on:
+
+```text
+http://0.0.0.0:8000
+```
+
+### 2. Command Center Dashboard (`Command-Center-Dashboard/`)
+
+Navigate to the dashboard directory:
+
+```bash
+cd Command-Center-Dashboard
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+### 3. CrowdShield Mobile App (`CrowdShieldApp/`)
+
+Navigate to the mobile app directory:
+
+```bash
+cd CrowdShieldApp
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the Expo Metro Bundler:
+
+```bash
+npx expo start
+```
+
+Scan the generated QR code using the **Expo Go** application on iOS or Android.
+
+---
+
+## 15. Execution Sequence
+
+To bring the entire CrowdShield platform online, run the components in the following order:
+
+1. **Step 1 — Backend:**
+   Setup and run `server.py` from the `backend` folder. This initializes the YOLO models, homography engines, and WebSocket broadcasters.
+
+2. **Step 2 — Command Center Dashboard:**
+   Setup and run the `Command-Center-Dashboard`. It will establish a connection to the running backend.
+
+3. **Step 3 — Mobile Application:**
+   Setup and run the `CrowdShieldApp` using Expo. Mobile clients will fetch the venue configuration, begin listening for anomaly alerts, and feed sensor data to the server when SOS triggers occur.
+
+
+## 16. Project Repository
 
 * **GitHub Repository:** [PremKumarMishra/CrowdShield](https://github.com/PremKumarMishra/CrowdShield)
 
 ---
 
-## 14. References & Academic Foundation
+## 17. References & Academic Foundation
 
 * Helbing, D., Farkas, I., & Vicsek, T. (2000). [Simulating dynamical features of escape panic](https://www.researchgate.net/publication/1761631_Crowd_turbulence_The_physics_of_crowd_disasters). *Nature*, 407(6803), 487-490.
 * Still, G. K. (2014). [Place and Crowd Safety Science / Case Studies on Disaster Prevention](https://www.emerald.com/jpmd/article/13/4/385/237656/Place-crowd-safety-crowd-science-Case-studies-and).
