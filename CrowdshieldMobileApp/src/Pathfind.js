@@ -1,5 +1,3 @@
-import { use } from "react";
-
 const DIRECTIONS = [
     { x: 1, y: 0 },
     { x: -1, y: 0 },
@@ -113,6 +111,16 @@ export function findSafePath({user,gate,heatbox,venueWidth,venueHeight,gridSize 
     const maxX = Math.floor(venueWidth / gridSize)
     const maxY = Math.floor(venueHeight / gridSize)
 
+    const crowdCosts = new Map()
+    for (let x = 0; x <= maxX; x++) 
+    {
+        for (let y = 0; y <= maxY; y++) 
+        {
+            const worldX = x * gridSize
+            const worldY = y * gridSize
+            crowdCosts.set(`${x},${y}`,getCrowdCost(worldX, worldY, heatbox))
+        }
+    }
     const openSet = [start]
     const closedSet = new Set()
 
@@ -122,16 +130,14 @@ export function findSafePath({user,gate,heatbox,venueWidth,venueHeight,gridSize 
 
     gScore.set(key(start), 0)
     fScore.set(key(start),distance(start, goal))
-
+    
     while (openSet.length > 0) 
     {
         const current =getLowestCostNode(openSet,fScore);
         if (current.x === goal.x && current.y === goal.y)
         {
             const gridPath = reconstructPath(cameFrom,current)
-            return gridPath.map(point =>
-                fromGrid(point,gridSize)
-            );
+            return gridPath.map(point =>fromGrid(point,gridSize));
         }
 
         const index = openSet.findIndex(node =>
@@ -158,12 +164,8 @@ export function findSafePath({user,gate,heatbox,venueWidth,venueHeight,gridSize 
                 continue
             }
 
-            const worldPosition = fromGrid(neighbor,gridSize)
-
-            const movementCost = distance(current,neighbor)
-            const crowdCost = getCrowdCost(worldPosition.x,worldPosition.y,heatbox);
-
-
+            const movementCost = distance(current, neighbor)
+            const crowdCost = crowdCosts.get(key(neighbor)) ?? 0
             const tentativeGScore = (gScore.get(key(current)) ?? Infinity) + movementCost +crowdCost
             const neighborKey = key(neighbor)
 
