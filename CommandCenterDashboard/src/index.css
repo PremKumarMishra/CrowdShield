@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+* 
+{
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b #020617;
+}
+
+.animate-ping
+{
+    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+::-webkit-scrollbar 
+{
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track 
+{
+    background: #020617;
+}
+
+::-webkit-scrollbar-thumb 
+{
+    background: #1e293b;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+}
+
+::-webkit-scrollbar-thumb:hover 
+{
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+::-webkit-scrollbar-thumb:active 
+{
+    background: #0284c7;
+}
+
+::-webkit-scrollbar-corner 
+{
+    background: transparent;
+}
